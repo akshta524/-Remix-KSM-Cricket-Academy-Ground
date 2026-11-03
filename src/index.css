@@ -1,0 +1,86 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: "Barlow Condensed", sans-serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --color-pitch-950: #040906;
+  --color-pitch-900: #07120a;
+  --color-pitch-850: #0b1a10;
+  --color-pitch-800: #0f2417;
+  --color-turf-700: #14532d;
+  --color-turf-600: #15803d;
+  --color-turf-500: #16a34a;
+  --color-turf-400: #22c55e;
+  --color-turf-300: #4ade80;
+  --color-lime-accent: #84cc16;
+}
+
+:root {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  color-scheme: light dark;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.light {
+  color-scheme: light;
+}
+
+/* Custom smooth dark/light scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, #050b07);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #193322);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, #234c32);
+}
+
+html.light {
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #94a3b8;
+  --scrollbar-thumb-hover: #64748b;
+}
+
+html.dark {
+  --scrollbar-track: #050b07;
+  --scrollbar-thumb: #193322;
+  --scrollbar-thumb-hover: #234c32;
+}
+
+/* Mobile viewport optimization & anti-horizontal drift */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent iOS Safari automatic zoom on focus while preserving compact desktop typography */
+@media (max-width: 640px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="date"],
+  input[type="number"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}

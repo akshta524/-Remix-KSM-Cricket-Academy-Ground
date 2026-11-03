@@ -1,0 +1,527 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import type {
+  GroundBooking,
+  NetsBooking,
+  BowlingMachineBooking,
+  AcademyAdmission,
+  HostelEnquiry,
+  PaymentSubmission,
+  WebsiteSettings,
+  Tournament,
+  TournamentRegistration
+} from '../src/types/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DB_FILE = path.resolve(__dirname, '../data/db.json');
+
+export interface DatabaseSchema {
+  groundBookings: GroundBooking[];
+  netsBookings: NetsBooking[];
+  bowlingBookings: BowlingMachineBooking[];
+  academyAdmissions: AcademyAdmission[];
+  hostelEnquiries: HostelEnquiry[];
+  payments: PaymentSubmission[];
+  settings: WebsiteSettings;
+  tournaments: Tournament[];
+  tournamentRegistrations: TournamentRegistration[];
+}
+
+const defaultSettings: WebsiteSettings = {
+  liveStreamActive: true,
+  liveStreamTitle: "Adibatla Premier League 2026 - Match 9: Nadargul Super Kings vs Telangana Warriors",
+  liveStreamAngle: "Main Pavilion Cam 1",
+  phonePeUpi: "9392259363@ybl",
+  phonePeQrImage: "",
+  noticeBanner: "LIVE TOURNAMENT MATCH: Watch Nadargul Super Kings vs Telangana Warriors CC in 360° multi-angle coverage below.",
+  contactPhone: "+91 93922 59363",
+  contactAddress: "Nadargul Rural, Adibatla, Telangana 501510"
+};
+
+const initialTournaments: Tournament[] = [
+  {
+    id: "TRN-APL-2026",
+    name: "Adibatla Premier League 2026",
+    shortName: "APL Season 4",
+    edition: "Season 4",
+    tagline: "The Premier T20 Cricket Championship of South Hyderabad",
+    format: "T20 Leather Ball (League + Knockouts)",
+    status: "Ongoing",
+    dates: "Oct 15 – Nov 12, 2026",
+    prizePool: "₹1,50,000",
+    venue: "KSM Cricket Ground, Adibatla",
+    description: "Annual regional club championship featuring 6 of Hyderabad's most competitive amateur & corporate cricket clubs competing for the prestigious KSM Trophy.",
+    teamsCount: 6,
+    entryFee: "₹18,000 per team",
+    registrationOpen: false,
+    contactNumber: "+91 93922 59363",
+    standings: [
+      { team: "Adibatla Strikers CC", played: 4, won: 3, lost: 1, tied: 0, nrr: "+1.420", points: 6, form: ["W", "W", "L", "W"] },
+      { team: "Cyberabad Royals", played: 4, won: 3, lost: 1, tied: 0, nrr: "+0.890", points: 6, form: ["W", "L", "W", "W"] },
+      { team: "Nadargul Super Kings", played: 3, won: 2, lost: 1, tied: 0, nrr: "+0.310", points: 4, form: ["L", "W", "W"] },
+      { team: "Telangana Warriors CC", played: 3, won: 1, lost: 2, tied: 0, nrr: "-0.220", points: 2, form: ["W", "L", "L"] },
+      { team: "TCS Tech Tigers CC", played: 4, won: 1, lost: 3, tied: 0, nrr: "-0.980", points: 2, form: ["L", "L", "W", "L"] },
+      { team: "Ranga Reddy Rhinos", played: 4, won: 1, lost: 3, tied: 0, nrr: "-1.350", points: 2, form: ["L", "W", "L", "L"] }
+    ],
+    fixtures: [
+      {
+        id: "APL-M8",
+        matchNo: 8,
+        stage: "League Match 8",
+        team1: "Adibatla Strikers CC",
+        team2: "Cyberabad Royals",
+        date: "2026-11-01",
+        time: "10:30 AM – 2:00 PM",
+        venue: "KSM Ground (Pitch 1 Turf)",
+        status: "Completed",
+        scores: {
+          team1Score: "184/5 (20.0 ov)",
+          team2Score: "162/8 (20.0 ov)",
+          overs: "20.0"
+        },
+        result: "Adibatla Strikers CC won by 22 runs",
+        playerOfTheMatch: "Vikram Reddy (74* off 41 balls, 2/18)"
+      },
+      {
+        id: "APL-M9",
+        matchNo: 9,
+        stage: "League Match 9",
+        team1: "Nadargul Super Kings",
+        team2: "Telangana Warriors CC",
+        date: "2026-11-03",
+        time: "10:30 AM – 2:00 PM",
+        venue: "KSM Ground (Session 2)",
+        status: "Live",
+        scores: {
+          team1Score: "142/4 (16.2 ov)",
+          team2Score: "Yet to bat",
+          overs: "16.2"
+        },
+        result: "Nadargul Super Kings batting first (Run Rate: 8.70)",
+        playerOfTheMatch: "Live Broadcast Active"
+      },
+      {
+        id: "APL-M10",
+        matchNo: 10,
+        stage: "League Match 10",
+        team1: "TCS Tech Tigers CC",
+        team2: "Ranga Reddy Rhinos",
+        date: "2026-11-07",
+        time: "7:30 AM – 10:30 AM",
+        venue: "KSM Ground (Session 1)",
+        status: "Upcoming",
+        result: "Scheduled Saturday morning fixture"
+      },
+      {
+        id: "APL-M11",
+        matchNo: 11,
+        stage: "Semi-Final 1",
+        team1: "Adibatla Strikers CC",
+        team2: "TBD (Rank 4)",
+        date: "2026-11-10",
+        time: "10:30 AM – 2:00 PM",
+        venue: "KSM Main Turf Ground",
+        status: "Upcoming",
+        result: "Knockout Qualifier"
+      },
+      {
+        id: "APL-M12",
+        matchNo: 12,
+        stage: "Grand Final",
+        team1: "Winner SF1",
+        team2: "Winner SF2",
+        date: "2026-11-12",
+        time: "2:30 PM – 6:30 PM",
+        venue: "KSM Floodlight Stadium Pitch",
+        status: "Upcoming",
+        result: "Championship Finale with Trophy & Cash Presentation"
+      }
+    ],
+    awards: [
+      { title: "Leading Run Scorer (Orange Cap)", player: "Vikram Reddy", team: "Adibatla Strikers CC", stats: "218 runs (Avg 72.6, SR 154)" },
+      { title: "Leading Wicket Taker (Purple Cap)", player: "Mohammed Zeeshan", team: "Cyberabad Royals", stats: "11 wickets (Econ 6.1)" },
+      { title: "Highest Individual Score", player: "Anand Krishna", team: "Nadargul Super Kings", stats: "91* off 52 balls" }
+    ],
+    highlights: [
+      "Broadcasted in 360° multi-angle camera angles",
+      "Official white Kookaburra balls provided",
+      "HCA accredited umpires & third umpire screen",
+      "Electronic digital scoreboard on boundary"
+    ]
+  },
+  {
+    id: "TRN-JCT-2026",
+    name: "KSM Junior Champions Trophy 2026",
+    shortName: "Junior Cup U-16",
+    edition: "Inaugural Edition",
+    tagline: "All-Telangana Inter-Academy Youth Cricket Championship",
+    format: "30 Overs Youth League (Red Leather Ball)",
+    status: "Upcoming",
+    dates: "Nov 20 – Dec 5, 2026",
+    prizePool: "₹60,000 + Training Scholarships",
+    venue: "KSM Cricket Ground, Adibatla",
+    description: "Grassroots youth tournament dedicated to discovering top teenage cricketing talent across Telangana. Verified age criteria (born after Jan 1, 2010).",
+    teamsCount: 8,
+    entryFee: "₹12,000 per academy team",
+    registrationOpen: true,
+    contactNumber: "+91 93922 59363",
+    standings: [
+      { team: "KSM Junior Academy XI (Host)", played: 0, won: 0, lost: 0, tied: 0, nrr: "0.000", points: 0 },
+      { team: "HCA District Colts XI", played: 0, won: 0, lost: 0, tied: 0, nrr: "0.000", points: 0 },
+      { team: "LB Nagar Junior Titans", played: 0, won: 0, lost: 0, tied: 0, nrr: "0.000", points: 0 },
+      { team: "Secunderabad Cricket Stars", played: 0, won: 0, lost: 0, tied: 0, nrr: "0.000", points: 0 },
+      { team: "Shamshabad Youngsters CC", played: 0, won: 0, lost: 0, tied: 0, nrr: "0.000", points: 0 },
+      { team: "Charminar Youth Cricket Academy", played: 0, won: 0, lost: 0, tied: 0, nrr: "0.000", points: 0 }
+    ],
+    fixtures: [
+      {
+        id: "JCT-M1",
+        matchNo: 1,
+        stage: "Opening Clash",
+        team1: "KSM Junior Academy XI",
+        team2: "HCA District Colts XI",
+        date: "2026-11-20",
+        time: "8:00 AM – 1:00 PM",
+        venue: "KSM Main Ground Pitch 1",
+        status: "Upcoming",
+        result: "Tournament Inauguration Match"
+      },
+      {
+        id: "JCT-M2",
+        matchNo: 2,
+        stage: "Group B Opener",
+        team1: "LB Nagar Junior Titans",
+        team2: "Secunderabad Cricket Stars",
+        date: "2026-11-21",
+        time: "8:00 AM – 1:00 PM",
+        venue: "KSM Main Ground Pitch 2",
+        status: "Upcoming",
+        result: "Scheduled Group Fixture"
+      }
+    ],
+    awards: [
+      { title: "Player of the Tournament", player: "TBD", team: "Award: ₹15,000 + 1-Year KSM Academy Scholarship", stats: "Evaluated by Senior Coaches" },
+      { title: "Emerging Fast Bowler", player: "TBD", team: "Speed Gun Tested", stats: "Highest clocked bowling speed" }
+    ],
+    highlights: [
+      "Compulsory Aadhaar/Birth Certificate age verification",
+      "Special evaluation by BCCI/HCA certified scouts",
+      "Complete video recording of every match",
+      "Hydration and athlete lunch provided"
+    ]
+  },
+  {
+    id: "TRN-HCNC-2026",
+    name: "Hyderabad Corporate Night Cup 2026",
+    shortName: "Corporate Night Cup",
+    edition: "Monsoon Edition",
+    tagline: "The Ultimate Floodlight Battle Between Hyderabad's Top Tech & Aerospace Firms",
+    format: "15 Overs Floodlights Super Clash",
+    status: "Completed",
+    dates: "Sep 10 – Oct 5, 2026",
+    prizePool: "₹1,10,000",
+    venue: "KSM Cricket Ground Floodlight Arena",
+    description: "Thrilling night tournament under high-intensity LED floodlights with 8 corporate teams competing across 4 weekends in September and October.",
+    teamsCount: 8,
+    entryFee: "₹20,000 per corporate team",
+    registrationOpen: false,
+    contactNumber: "+91 93922 59363",
+    standings: [
+      { team: "Infosys Cyber Knights (Champions)", played: 5, won: 5, lost: 0, tied: 0, nrr: "+2.150", points: 10, form: ["W", "W", "W", "W", "W"] },
+      { team: "Tata Aero Warriors CC (Runners-up)", played: 5, won: 4, lost: 1, tied: 0, nrr: "+1.680", points: 8, form: ["W", "W", "W", "W", "L"] },
+      { team: "TCS Adibatla Strikers", played: 4, won: 2, lost: 2, tied: 0, nrr: "+0.250", points: 4, form: ["W", "L", "W", "L"] },
+      { team: "Wipro Gachibowli Titans", played: 4, won: 2, lost: 2, tied: 0, nrr: "-0.110", points: 4, form: ["L", "W", "L", "W"] },
+      { team: "Cognizant Tech XI", played: 3, won: 1, lost: 2, tied: 0, nrr: "-0.640", points: 2, form: ["L", "W", "L"] },
+      { team: "Amazon Hyderabad Hawks", played: 3, won: 1, lost: 2, tied: 0, nrr: "-0.890", points: 2, form: ["W", "L", "L"] },
+      { team: "Microsoft Cyber Eagles", played: 3, won: 0, lost: 3, tied: 0, nrr: "-1.240", points: 0, form: ["L", "L", "L"] },
+      { team: "Boeing Aerospace CC", played: 3, won: 0, lost: 3, tied: 0, nrr: "-1.520", points: 0, form: ["L", "L", "L"] }
+    ],
+    fixtures: [
+      {
+        id: "HCNC-FINAL",
+        matchNo: 15,
+        stage: "Championship Final",
+        team1: "Infosys Cyber Knights",
+        team2: "Tata Aero Warriors CC",
+        date: "2026-10-05",
+        time: "7:00 PM – 10:00 PM",
+        venue: "KSM Floodlight Ground",
+        status: "Completed",
+        scores: {
+          team1Score: "148/4 (15.0 ov)",
+          team2Score: "142/9 (15.0 ov)",
+          overs: "15.0"
+        },
+        result: "Infosys CC won by 6 runs in a thrilling final-over finish",
+        playerOfTheMatch: "Sandeep Rao (52 off 28 balls, 3/14)"
+      },
+      {
+        id: "HCNC-SF1",
+        matchNo: 13,
+        stage: "Semi-Final 1",
+        team1: "Infosys Cyber Knights",
+        team2: "TCS Adibatla Strikers",
+        date: "2026-10-03",
+        time: "6:30 PM – 9:30 PM",
+        venue: "KSM Floodlight Ground",
+        status: "Completed",
+        scores: {
+          team1Score: "165/3 (15.0 ov)",
+          team2Score: "135/8 (15.0 ov)",
+          overs: "15.0"
+        },
+        result: "Infosys CC won by 30 runs",
+        playerOfTheMatch: "Rahul Deshmukh (68 off 34)"
+      },
+      {
+        id: "HCNC-SF2",
+        matchNo: 14,
+        stage: "Semi-Final 2",
+        team1: "Tata Aero Warriors CC",
+        team2: "Wipro Gachibowli Titans",
+        date: "2026-10-04",
+        time: "6:30 PM – 9:30 PM",
+        venue: "KSM Floodlight Ground",
+        status: "Completed",
+        scores: {
+          team1Score: "154/6 (15.0 ov)",
+          team2Score: "140/7 (15.0 ov)",
+          overs: "15.0"
+        },
+        result: "Tata Aero Warriors won by 14 runs",
+        playerOfTheMatch: "Akhil Goud (61 off 31)"
+      }
+    ],
+    awards: [
+      { title: "Champions Trophy + ₹75,000", player: "Infosys Cyber Knights", team: "Captain: Rajesh Iyer", stats: "Undefeated tournament run (5-0)" },
+      { title: "Runners-Up Trophy + ₹35,000", player: "Tata Aero Warriors CC", team: "Captain: Akhil Goud", stats: "Finalists" },
+      { title: "Player of the Tournament", player: "Sandeep Rao", team: "Infosys CC", stats: "286 runs & 9 wickets" },
+      { title: "Best Bowler", player: "Pradeep Kumar", team: "Tata Aero", stats: "14 wickets (Economy 5.8)" }
+    ],
+    highlights: [
+      "High-lux floodlight towers ensuring day-like ball visibility",
+      "Pink leather balls for optimal night tracking",
+      "Live DJ and boundary commentary during play",
+      "Custom digital certificates for all participating corporate players"
+    ]
+  }
+];
+
+const initialData: DatabaseSchema = {
+  groundBookings: [
+    {
+      id: "KSM-GB-101",
+      date: new Date().toISOString().split('T')[0],
+      session: "s1",
+      sessionName: "Session 1 (7:30 AM – 10:30 AM)",
+      timing: "7:30 AM – 10:30 AM",
+      isWeekend: false,
+      price: 3000,
+      fullName: "Vikram Reddy",
+      phone: "+91 98490 12345",
+      email: "vikram.reddy@hyderabadcricket.org",
+      teamName: "Adibatla Strikers CC",
+      playersCount: 16,
+      message: "Need white match balls and scoreboard for APL warm-up.",
+      status: "Confirmed",
+      paymentStatus: "Verified",
+      utrNumber: "PHPE4829104819",
+      createdAt: new Date(Date.now() - 86400000 * 2).toISOString()
+    },
+    {
+      id: "KSM-GB-102",
+      date: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
+      session: "s2",
+      sessionName: "Session 2 (10:30 AM – 2:00 PM)",
+      timing: "10:30 AM – 2:00 PM",
+      isWeekend: true,
+      price: 6500,
+      fullName: "Arun Kumar",
+      phone: "+91 94401 98765",
+      email: "arun.kumar@gmail.com",
+      teamName: "Cyberabad Royals",
+      playersCount: 22,
+      message: "Friendly weekend corporate tournament 25 overs match.",
+      status: "Pending",
+      paymentStatus: "Submitted",
+      utrNumber: "UPI8391024729",
+      createdAt: new Date(Date.now() - 3600000 * 12).toISOString()
+    }
+  ],
+  netsBookings: [
+    {
+      id: "KSM-NET-201",
+      date: new Date().toISOString().split('T')[0],
+      sessionType: "night",
+      timing: "7:00 PM – 9:00 PM",
+      durationHours: 2,
+      pricePerHour: 800,
+      totalPrice: 1600,
+      fullName: "Karthik Varma",
+      phone: "+91 91002 33445",
+      email: "karthik.varma@gmail.com",
+      playersCount: 4,
+      message: "Under floodlights with red leather balls.",
+      status: "Confirmed",
+      paymentStatus: "Verified",
+      utrNumber: "PHPE1928374650",
+      createdAt: new Date(Date.now() - 86400000).toISOString()
+    }
+  ],
+  bowlingBookings: [
+    {
+      id: "KSM-BM-301",
+      date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+      preferredTime: "6:30 AM",
+      sessionCount: 2,
+      totalBalls: 400,
+      totalPrice: 2000,
+      fullName: "Sanjay Sharma",
+      phone: "+91 99887 76655",
+      email: "sanjay.sharma@gmail.com",
+      message: "Outswing pace 120kmph practice for upcoming tournament.",
+      status: "Confirmed",
+      paymentStatus: "Verified",
+      utrNumber: "UPI2938475610",
+      createdAt: new Date(Date.now() - 3600000 * 8).toISOString()
+    }
+  ],
+  academyAdmissions: [
+    {
+      id: "KSM-ADM-401",
+      studentName: "Rohan Varma",
+      dob: "2010-06-14",
+      age: 16,
+      parentName: "Srinivas Varma",
+      parentPhone: "+91 93922 11223",
+      email: "srinivas.varma@gmail.com",
+      address: "Plot 42, Green Park, Adibatla, Telangana",
+      previousExperience: "Played school zonal cricket, right-hand top-order batsman.",
+      trainingProgram: "Batting",
+      membership: "Yearly",
+      fee: 40000,
+      message: "Interested in weekly matches and camp training.",
+      status: "Approved",
+      paymentStatus: "Verified",
+      createdAt: new Date(Date.now() - 86400000 * 5).toISOString()
+    },
+    {
+      id: "KSM-ADM-402",
+      studentName: "Aditya Rao",
+      dob: "2012-09-22",
+      age: 14,
+      parentName: "Mallikarjun Rao",
+      parentPhone: "+91 98480 55667",
+      email: "mallikarjun.rao@gmail.com",
+      address: "Near TCS Synergy Park, Adibatla",
+      previousExperience: "Wicket keeping & middle order batting.",
+      trainingProgram: "Wicket Keeping",
+      membership: "6 Months",
+      fee: 20000,
+      message: "Looking for morning coaching batches before school.",
+      status: "Pending",
+      paymentStatus: "Pending",
+      createdAt: new Date(Date.now() - 3600000 * 18).toISOString()
+    }
+  ],
+  hostelEnquiries: [
+    {
+      id: "KSM-HST-501",
+      studentName: "Praneeth Naidu",
+      age: 15,
+      parentName: "Subba Naidu",
+      phone: "+91 99599 44332",
+      email: "subba.naidu@gmail.com",
+      preferredDuration: "1 Year (Full Season)",
+      roomType: "AC",
+      message: "Coming from Vijayawada for comprehensive cricket academy coaching and hostel stay.",
+      status: "Contacted",
+      createdAt: new Date(Date.now() - 86400000 * 3).toISOString()
+    }
+  ],
+  payments: [
+    {
+      id: "PAY-1001",
+      bookingType: "ground",
+      bookingId: "KSM-GB-101",
+      amount: 3000,
+      payerName: "Vikram Reddy",
+      payerPhone: "+91 98490 12345",
+      utrNumber: "PHPE4829104819",
+      status: "Verified",
+      notes: "Verified via PhonePe merchant statement",
+      verifiedAt: new Date(Date.now() - 86400000).toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 2).toISOString()
+    },
+    {
+      id: "PAY-1002",
+      bookingType: "ground",
+      bookingId: "KSM-GB-102",
+      amount: 6500,
+      payerName: "Arun Kumar",
+      payerPhone: "+91 94401 98765",
+      utrNumber: "UPI8391024729",
+      status: "Submitted",
+      notes: "Screenshot uploaded, awaiting verification",
+      createdAt: new Date(Date.now() - 3600000 * 12).toISOString()
+    }
+  ],
+  tournaments: initialTournaments,
+  tournamentRegistrations: [
+    {
+      id: "TRN-REG-801",
+      tournamentId: "TRN-JCT-2026",
+      tournamentName: "KSM Junior Champions Trophy 2026",
+      teamName: "Warangal Rising Stars Colts",
+      captainName: "K. Nagesh (Coach)",
+      phone: "+91 98481 22334",
+      email: "warangal.stars@gmail.com",
+      city: "Warangal",
+      playersCount: 15,
+      notes: "Under-16 team with 4 state-level school players.",
+      status: "Approved",
+      createdAt: new Date(Date.now() - 86400000 * 2).toISOString()
+    }
+  ],
+  settings: defaultSettings
+};
+
+function ensureDbFile(): DatabaseSchema {
+  const dir = path.dirname(DB_FILE);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  if (!fs.existsSync(DB_FILE)) {
+    fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2), 'utf-8');
+    return initialData;
+  }
+  try {
+    const raw = fs.readFileSync(DB_FILE, 'utf-8');
+    const parsed = JSON.parse(raw);
+    return {
+      ...initialData,
+      ...parsed,
+      tournaments: parsed.tournaments && parsed.tournaments.length > 0 ? parsed.tournaments : initialTournaments,
+      tournamentRegistrations: parsed.tournamentRegistrations || initialData.tournamentRegistrations,
+      settings: { ...defaultSettings, ...(parsed.settings || {}) }
+    };
+  } catch (err) {
+    console.error('Error reading DB, re-initializing default data', err);
+    fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2), 'utf-8');
+    return initialData;
+  }
+}
+
+export function getDb(): DatabaseSchema {
+  return ensureDbFile();
+}
+
+export function saveDb(data: DatabaseSchema): void {
+  const dir = path.dirname(DB_FILE);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+}

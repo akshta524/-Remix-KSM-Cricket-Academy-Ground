@@ -1,0 +1,6 @@
+{
+  "name": "KSM Cricket Academy & Ground",
+  "description": "Premium cricket academy, tournament ground booking, floodlight practice nets, bowling machine, and hostel facilities in Adibatla, Telangana.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
